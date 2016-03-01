@@ -12,17 +12,64 @@ angular.module('starter.controllers', [])
      // use dependency injection to get the BeerData factory
   $scope.form = {};                                                       // used to store your form data
   $scope.search = function() {  
-    //name = $scope.form.name;                                          // called when the search button is clicked
+    //name = $scope.form.name;   
+    _name = "";
+    _organic = "";
+    _abv_range = "";
+    _ibu_range = "";
+
+    if ($scope.form.abv_exact != null && $scope.form.abvmin == null && $scope.form.abvmax == null) 
+    {
+      _abv_range = $scope.form.abv_exact;
+    }
+
+    else if($scope.form.abvmin != null && $scope.form.abvmax != null)
+    {
+      _abv_range = $scope.form.abvmin + "," + $scope.form.abvmax;
+    }
+
+    else if($scope.form.abvmin == null && $scope.form.abvmax != null)
+    {
+      _abv_range = "-" + $scope.form.abvmax;
+    }
+
+    else if($scope.form.abvmin != null && $scope.form.abvmax == null)
+    {
+      _abv_range = "%2B" + $scope.form.abvmin;
+    }
+
+    if ($scope.form.ibu_exact != null) 
+    {
+      _ibu_range = $scope.form.ibu_exact;
+    }
+
+    if($scope.form.name != null)
+    {
+      _name = $scope.form.name;
+    }
+
+    if ($scope.form.isOrganic == "Y") {
+      _organic = "Y";
+    }
+    else if($scope.form.isOrganic == "N")
+    {
+      _organic = "N";
+    }
+
+
+                                           // called when the search button is clicked
     $http({
       method: 'GET',
       url: 'https://salty-taiga-88147.herokuapp.com/beers',               // the link to my proxy
       params: {                                                           // sets the GET params
-        name: $scope.form.name,
-        abv: $scope.form.abv,
-        isOrganic: $scope.form.organic
+        abv: _abv_range,
+        isOrganic: _organic,
+        ibu_exact: _ibu_range,
+        name: _name
       }
     }).then(function successCallback(response) {
       BeerData.data = response.data; 
+
       console.log("data--")                                   // save the response data in the factory
       $state.go('app.beers');                                             // go to the beer results state
     });   
@@ -31,21 +78,7 @@ angular.module('starter.controllers', [])
 
 .controller('BeersCtrl', function($scope, BeerData) {
   $scope.beers = {};
-  //$scope.beers.data = BeerData.data;
 
-
-                                                                          // test to make sure that the data got passed through
-  // $scope.playlists = [
-  //   // {title: 'asdf', name: '-', abv: 3.2, beer_id:1}
-  //                                                     // this should be updated to contain the beer data
-  //   { title: 'Reggae', beer_id: 1 },
-  //   { title: 'Chill', beer_id: 2 },
-  //   { title: 'Dubstep', beer_id: 3 },
-  //   { title: 'Indie', beer_id: 4 },
-  //   { title: 'Rap', beer_id: 5 },
-  //   { title: 'Cowbell', beer_id: 6 }
-    
-  // ];
   console.log(BeerData.data.data);
   $scope.playlists = BeerData.data.data;
   console.log($scope.playlists);
@@ -61,6 +94,7 @@ angular.module('starter.controllers', [])
   foundBeer = false;
   var i = 0;
   $scope.beer = BeerData.data.data[0];
+
   while(foundBeer == false)
   {
     $scope.beer = BeerData.data.data[i];
